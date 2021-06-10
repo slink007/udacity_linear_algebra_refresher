@@ -25,9 +25,8 @@ class Vector(object):
 
     def add(self, v):
         """
-        Adds one Vector to another Vector and returns a tuple containing the resulting coordinates.
-        
-        Returning a Vector is a better option?  
+        Adds one Vector to another Vector and returns a Vector 
+        containing the result.
         """
 
         if not isinstance(v, Vector):
@@ -42,14 +41,13 @@ class Vector(object):
             result = [self.coordinates[i] + v.coordinates[i] for i in range(self.dimension)]
             result += v.coordinates[self.dimension:]
 
-        return tuple(result)
+        return Vector(result)
 
 
     def subtract(self, v):
         """
-        Subtracts one Vector from another Vector and returns a tuple containing the resulting coordinates.
-        
-        Returning a Vector is a better option?  
+        Subtracts one Vector from another Vector and returns a Vector 
+        containing the result.
         """
 
         if not isinstance(v, Vector):
@@ -67,20 +65,19 @@ class Vector(object):
             temp = [0 - x for x in v.coordinates[self.dimension:]]
             result += temp
 
-        return tuple(result)
+        return Vector(result)
 
 
     def scalar(self, n):
         """
-        Multiplies each element in a Vector by a constant and returns a tuple 
-        containing the resulting coordinates.
-        
-        Returning a Vector is a better option?  
+        Multiplies each element in a Vector by a constant and returns a Vector 
+        containing the result.
         """
         
         if not isinstance(n, Number):
             raise TypeError('Scalar needs to be a number')
         
         temp = [n * x for x in self.coordinates]
-        return tuple(temp)
+
+        return Vector(temp)
 
