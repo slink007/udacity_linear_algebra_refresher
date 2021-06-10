@@ -1,3 +1,5 @@
+from numbers import Number
+
 class Vector(object):
     def __init__(self, coordinates):
         try:
@@ -23,14 +25,62 @@ class Vector(object):
 
     def add(self, v):
         """
-        Adds one Vector to another Vector and returns a tuple containing the result.
+        Adds one Vector to another Vector and returns a tuple containing the resulting coordinates.
         
-        Returning a Vector is better option?  
-        
-        Currently this assumes both Vectors are of same size (problem?) and that both are
-        two-dimensional Vectors (definitely a problem).
+        Returning a Vector is a better option?  
         """
-        if not isinstance(v, Vector):
-            raise TypeError('Tried to add a non-vector')
 
-        return (self.coordinates[0] + v.coordinates[0], self.coordinates[1] + v.coordinates[1])
+        if not isinstance(v, Vector):
+            raise TypeError('Added value is not a vector')
+
+        if self.dimension == v.dimension:  # vectors are equal size
+            result = [self.coordinates[i] + v.coordinates[i] for i in range(self.dimension)]
+        elif self.dimension > v.dimension: # this vector has more dimensions than the other one
+            result = [self.coordinates[i] + v.coordinates[i] for i in range(v.dimension)]
+            result += self.coordinates[v.dimension:]
+        else:  # the other vector has more dimensions than this one
+            result = [self.coordinates[i] + v.coordinates[i] for i in range(self.dimension)]
+            result += v.coordinates[self.dimension:]
+
+        return tuple(result)
+
+
+    def subtract(self, v):
+        """
+        Subtracts one Vector from another Vector and returns a tuple containing the resulting coordinates.
+        
+        Returning a Vector is a better option?  
+        """
+
+        if not isinstance(v, Vector):
+            raise TypeError('Subtracted value is not a vector')
+
+        if self.dimension == v.dimension:  # vectors are equal size
+            result = [self.coordinates[i] - v.coordinates[i] for i in range(self.dimension)]
+        elif self.dimension > v.dimension: # this vector has more dimensions than the other one
+            result = [self.coordinates[i] - v.coordinates[i] for i in range(v.dimension)]
+            result += self.coordinates[v.dimension:]
+        else:  # the other vector has more dimensions than this one
+            # I'm not entirely sure what should happen here.  I'm going on the assumption that
+            # the "missing" fields from this Vector are populated with zeroes.
+            result = [self.coordinates[i] - v.coordinates[i] for i in range(self.dimension)]
+            temp = [0 - x for x in v.coordinates[self.dimension:]]
+            result += temp
+
+        return tuple(result)
+
+
+    def scalar(self, n):
+        """
+        Multiplies each element in a Vector by a constant and returns a tuple 
+        containing the resulting coordinates.
+        
+        Returning a Vector is a better option?  
+        """
+        
+        if not isinstance(n, Number):
+            raise TypeError('Scalar needs to be a number')
+        
+        temp = [n * x for x in self.coordinates]
+        return tuple(temp)
+
