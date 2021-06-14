@@ -120,24 +120,19 @@ class Vector(object):
         return sum(result)
 
 
-    def radians(self, v):
+    def angle(self, v, in_radians=True):
         """
-        Returns the angle (in radians) between this Vector and another Vector.
-        """
-
-        if not isinstance(v, Vector):
-            raise TypeError('Other element must be a vector')
-
-        return math.acos(self.dot(v)/(self.magnitude() * v.magnitude()))        
-
-
-    def degrees(self, v):
-        """
-        Returns the angle (in degrees) between this Vector and another Vector.
+        Returns the angle between this Vector and another Vector.
+        Result is in radians unless that is set to False in which case the
+        result is in degrees.
         """
 
         if not isinstance(v, Vector):
             raise TypeError('Other element must be a vector')
 
-        return math.degrees(self.radians(v))
+        angle = math.acos(self.dot(v)/(self.magnitude() * v.magnitude()))
+
+        if in_radians:
+            return angle
+        return math.degrees(angle)
 
