@@ -130,7 +130,11 @@ class Vector(object):
         if not isinstance(v, Vector):
             raise TypeError('Other element must be a vector')
 
-        angle = math.acos(self.dot(v)/(self.magnitude() * v.magnitude()))
+        try:
+            angle = math.acos(self.dot(v)/(self.magnitude() * v.magnitude()))
+
+        except ZeroDivisionError:
+            raise Exception("Angle to a zero vector is undefined")
 
         if in_radians:
             return angle
