@@ -140,3 +140,29 @@ class Vector(object):
             return angle
         return math.degrees(angle)
 
+
+    def is_zero(self):
+        """
+        Returns True if Vector is a zero vector, returns False if not
+        """
+        try:
+            for item in self.coordinates:
+                assert item == 0
+        except AssertionError:
+            return False
+
+        return True
+
+
+
+    def is_parallel(self, v):
+        """
+        
+        """
+        if not isinstance(v, Vector):
+            raise TypeError('Must compare to a vector')
+
+        if self.dimension != v.dimension:  # unequally sized vectors not parallel
+            return False
+        return True
+
