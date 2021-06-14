@@ -1,4 +1,6 @@
 from numbers import Number
+import math
+
 
 class Vector(object):
     def __init__(self, coordinates):
@@ -80,4 +82,62 @@ class Vector(object):
         temp = [n * x for x in self.coordinates]
 
         return Vector(temp)
+
+
+    def magnitude(self):
+        """
+        Returns the magnitude of the vector
+        """
+        sum_of_squares = [x * x for x in self.coordinates]
+        return math.sqrt(sum(sum_of_squares))
+
+
+    def unit(self):
+        """
+        Returns a Vector which is the unit vector for the calling Vector.
+        """
+        try:
+            mag = self.magnitude()
+            return self.scalar(1/mag)
+
+        except ZeroDivisionError:
+            raise Exception("Can not find unit vector of a zero vector")
+
+
+    def dot(self, v):
+        """
+        Returns the dot product of two Vectors.
+        """
+
+        if not isinstance(v, Vector):
+            raise TypeError('Dot product requires a vector')
+
+        if self.dimension < v.dimension:
+            result = [self.coordinates[i] * v.coordinates[i] for i in range(self.dimension)]
+        else:  
+            result = [self.coordinates[i] * v.coordinates[i] for i in range(v.dimension)]
+
+        return sum(result)
+
+
+    def radians(self, v):
+        """
+        Returns the angle (in radians) between this Vector and another Vector.
+        """
+
+        if not isinstance(v, Vector):
+            raise TypeError('Other element must be a vector')
+
+        return math.acos(self.dot(v)/(self.magnitude() * v.magnitude()))        
+
+
+    def degrees(self, v):
+        """
+        Returns the angle (in degrees) between this Vector and another Vector.
+        """
+
+        if not isinstance(v, Vector):
+            raise TypeError('Other element must be a vector')
+
+        return math.degrees(self.radians(v))
 
