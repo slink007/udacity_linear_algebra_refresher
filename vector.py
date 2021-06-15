@@ -186,7 +186,7 @@ class Vector(object):
         if not isinstance(v, Vector):
             raise TypeError('Must compare to a vector')
 
-        if self.dot(v) == 0:
+        if (round(self.dot(v), 9)) == 0:
             return True
         return False
 
