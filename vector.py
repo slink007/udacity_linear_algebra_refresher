@@ -191,3 +191,18 @@ class Vector(object):
         return False
 
 
+    def projected(self, v):
+        """
+        Returns the Vector that results when projecting this Vector onto Vector v.
+        """
+        return (v.unit()).scalar( self.dot(v.unit()) )
+
+
+    def orthogonal(self, v):
+        """
+        Returns the Vector which would be orthogonal to the Vector that results from
+        projecting this Vector onto Vector v.
+        """
+        return self.subtract(self.projected(v))
+
+
