@@ -143,7 +143,8 @@ class Vector(object):
 
     def is_zero(self):
         """
-        Returns True if Vector is a zero vector, returns False if not
+        Returns True if Vector is a zero vector, returns False if not 
+        a zero vector.
         """
         try:
             for item in self.coordinates:
@@ -157,12 +158,23 @@ class Vector(object):
 
     def is_parallel(self, v):
         """
-        
+        Returns True if Vector v is parallel to this Vector, returns False 
+        if not parallel.
         """
         if not isinstance(v, Vector):
             raise TypeError('Must compare to a vector')
 
+        if self.is_zero() or v.is_zero():  # zero vectors always parallel
+            return True
+
         if self.dimension != v.dimension:  # unequally sized vectors not parallel
+            return False
+
+        ratio = v.coordinates[0] / self.coordinates[0]
+        try:
+            for i in range(1, len(self.coordinates)):
+                assert (v.coordinates[i] / self.coordinates[i]) == ratio
+        except AssertionError:
             return False
         return True
 
