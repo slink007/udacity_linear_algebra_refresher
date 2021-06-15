@@ -155,7 +155,6 @@ class Vector(object):
         return True
 
 
-
     def is_parallel(self, v):
         """
         Returns True if Vector v is parallel to this Vector, returns False 
@@ -177,4 +176,18 @@ class Vector(object):
         except AssertionError:
             return False
         return True
+
+
+    def is_orthogonal(self, v):
+        """
+        Returns True if Vector v is orthogonal to this Vector, returns False 
+        if not orthogonal.
+        """
+        if not isinstance(v, Vector):
+            raise TypeError('Must compare to a vector')
+
+        if self.dot(v) == 0:
+            return True
+        return False
+
 
