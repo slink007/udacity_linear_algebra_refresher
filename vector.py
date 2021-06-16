@@ -9,12 +9,17 @@ class Vector(object):
                 raise ValueError
             self.coordinates = tuple(coordinates)
             self.dimension = len(coordinates)
+            if self.dimension < 2:
+                raise IndexError
 
         except ValueError:
             raise ValueError('The coordinates must be nonempty')
 
         except TypeError:
             raise TypeError('The coordinates must be an iterable')
+
+        except IndexError:
+            raise IndexError('Vector needs at least 2 coordinates')
 
 
     def __str__(self):
@@ -206,3 +211,49 @@ class Vector(object):
         return self.subtract(self.projected(v))
 
 
+    def cross(self, v):
+        """
+        Returns a Vector which the result of the cross product of this Vector and Vector v.
+        """
+
+        if not isinstance(v, Vector):
+            raise TypeError('Cross product requires a vector')
+
+        if (self.dimension > 3) or (v.dimension > 3):
+            raise IndexError('Cross product not valid for Vectors having more than 3 coordintates.')
+
+        a = list(self.coordinates)
+        b = list(v.coordinates)
+
+        # Turns a 2-D Vector into a 3-D.  If Vector is already 3-D having an extra element doesn't 
+        # hurt as the extra won't be used anyway.
+        a.append(0)
+        b.append(0)
+
+        result = [((a[1]*b[2]) - (b[1]*a[2])), 
+                    0 - ((a[0] * b[2]) - (b[0] * a[2])), 
+                    ((a[0]*b[1]) - (b[0]*a[1]))]
+        return Vector(result)
+
+
+    def p_area(self, v):
+        """
+        If two vectors are to be subjected to a cross product, and those vectors are placed end-to-end,
+        we can construct a parallelogram out of the possible ways these vectors can be combined.
+        This method returns the area of such a parallelogram although I have no idea why anyone
+        would want such a thing.  But the class I'm taking requires this functionality so here it
+        is.
+        """
+        return (self.cross(v)).magnitude()
+
+
+    def t_area(self, v):
+        """
+        If two vectors are to be subjected to a cross product, and those vectors are placed end-to-end,
+        we can construct a parallelogram out of the possible ways these vectors can be combined.
+        Furthermore, we can draw a line across this parallelogram and create two equal triangles.
+        This method returns the area of such a triangle although I have no idea why anyone
+        would want such a thing.  But the class I'm taking requires this functionality so here it
+        is.
+        """
+        return (self.p_area(v)) / 2
