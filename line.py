@@ -114,13 +114,39 @@ class Line(object):
         """
         Return True if Line l is parallel to this Line, otherwise return False.
         """
-        if not isinstance(l, Line):
-            raise TypeError('Must compare to a line')
-
         v1 = Vector(self.normal_vector)
         v2 = Vector(l.normal_vector)
 
         return v1.is_parallel(v2)
+
+
+    def is_same(self, l):
+        """
+        Returns True if this Line and Line l describe the same line.  Returns False
+        if that is not the case.
+        """
+        ratio = self.normal_vector[0] / l.normal_vector[0]
+        try:
+            for i in range(1, len(self.normal_vector)):
+                diff = MyDecimal( abs((self.normal_vector[i] / l.normal_vector[i]) - ratio) )
+                assert diff.is_near_zero()
+        except AssertionError:
+            return False
+        return True
+
+
+    def intersection(self, l):
+        """
+        Returns a tuple indicating how many intersections there are between two Lines.
+        If lines are parallel, and there are no intersections, it returns (0,).
+        If lines are parallel, and the lines are the same, it returns (-1,).
+        If lines are not parallel it calculates the intersection point and returns the
+        coordinates of that intersection as (x, y).
+        """
+        if is_parallel(l):
+            if is_same(l):
+                return (-1,)
+            return (0,)
 
 
 class MyDecimal(Decimal):
