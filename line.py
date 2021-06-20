@@ -10,6 +10,15 @@ class Line(object):
     NO_NONZERO_ELTS_FOUND_MSG = 'No nonzero elements found'
 
     def __init__(self, normal_vector=None, constant_term=None):
+        """
+        Expects a line in the form of Ax + By = k.
+
+        The normal_vector input needs to be an iterable suitable for forming
+        a Vector.  The values in that iterable must be the 'A' and 'B' 
+        values from the line equation.
+
+        Constant term = k. 
+        """
         self.dimension = 2
 
         if not normal_vector:
@@ -44,7 +53,11 @@ class Line(object):
 
 
     def __str__(self):
-
+    """
+    Creates the string that is printed out when a Line object is
+    printed.  For example, if the Line is 3x - 2y = 1 this will
+    print 3x_1 - 2x_2 = 1.
+    """
         num_decimal_places = 3
 
         def write_coefficient(coefficient, is_initial_term=False):
@@ -95,6 +108,19 @@ class Line(object):
             if not MyDecimal(item).is_near_zero():
                 return k
         raise Exception(Line.NO_NONZERO_ELTS_FOUND_MSG)
+
+
+    def is_parallel(self, l):
+        """
+        Return True if Line l is parallel to this Line, otherwise return False.
+        """
+        if not isinstance(l, Line):
+            raise TypeError('Must compare to a line')
+
+        v1 = Vector(self.normal_vector)
+        v2 = Vector(l.normal_vector)
+
+        return v1.is_parallel(v2)
 
 
 class MyDecimal(Decimal):
