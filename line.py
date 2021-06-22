@@ -143,11 +143,29 @@ class Line(object):
         If lines are not parallel it calculates the intersection point and returns the
         coordinates of that intersection as (x, y).
         """
+        if not isinstance(l, Line):
+            raise TypeError('Intersection test requires a line.')
+
         if is_parallel(l):
             if is_same(l):
                 return (-1,)
             return (0,)
 
+        # If we got here then the lines are not parallel and they have an intersection at
+        # (x, y) with:
+        # x = (DK1 - BK2) / (AD - BC)
+        # y = (AK2 - CK1) / (AD - BC)
+        A = self.normal_vector[0]
+        B = self.normal_vector[1]
+        K1 = self.constant_term
+        C = l.normal_vector[0]
+        D = l.normal_vector[1]
+        K2 = l.constant_term
+        denominator = (A * D) - (B * C)
+        x = ((D * K1) - (B * K2)) / denominator
+        y = ((A * K2) - (C * K1)) / denominator
+
+        return (x, y)
 
 class MyDecimal(Decimal):
     def is_near_zero(self, eps=1e-10):
