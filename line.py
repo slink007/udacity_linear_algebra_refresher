@@ -18,29 +18,10 @@ class Line(object):
         self.normal_vector = normal_vector
 
         if not constant_term:
-            constant_term = Decimal('0')
+            constant_term = Decimal(0)
         self.constant_term = Decimal(constant_term)
 
         self.set_basepoint()
-
-
-    def set_basepoint(self):
-        try:
-            n = self.normal_vector
-            c = self.constant_term
-            basepoint_coords = ['0']*self.dimension
-
-            initial_index = Line.first_nonzero_index(n)
-            initial_coefficient = n[initial_index]
-
-            basepoint_coords[initial_index] = c/initial_coefficient
-            self.basepoint = Vector(basepoint_coords)
-
-        except Exception as e:
-            if str(e) == Line.NO_NONZERO_ELTS_FOUND_MSG:
-                self.basepoint = None
-            else:
-                raise e
 
 
     def __str__(self):
@@ -67,7 +48,7 @@ class Line(object):
 
             return output
 
-        n = self.normal_vector
+        n = self.normal_vector.coordinates
 
         try:
             initial_index = Line.first_nonzero_index(n)
@@ -89,12 +70,34 @@ class Line(object):
         return output
 
 
+    def set_basepoint(self):
+        try:
+            n = self.normal_vector.coordinates
+            c = self.constant_term
+            basepoint_coords = ['0']*self.dimension
+
+            initial_index = Line.first_nonzero_index(n)
+            initial_coefficient = Decimal(n[initial_index])
+            # Failure to cast as Decimal on previous line was causing script
+            # to crash.  Can't divide Decimal by a float.
+
+            basepoint_coords[initial_index] = c/initial_coefficient
+            self.basepoint = Vector(basepoint_coords)
+
+        except Exception as e:
+            if str(e) == Line.NO_NONZERO_ELTS_FOUND_MSG:
+                self.basepoint = None
+            else:
+                raise e
+
+
     @staticmethod
     def first_nonzero_index(iterable):
         for k, item in enumerate(iterable):
             if not MyDecimal(item).is_near_zero():
                 return k
         raise Exception(Line.NO_NONZERO_ELTS_FOUND_MSG)
+
 
 
 class MyDecimal(Decimal):
