@@ -74,7 +74,7 @@ class Line(object):
         try:
             n = self.normal_vector.coordinates
             c = self.constant_term
-            basepoint_coords = ['0']*self.dimension
+            basepoint_coords = [0]*self.dimension
 
             initial_index = Line.first_nonzero_index(n)
             initial_coefficient = Decimal(n[initial_index])
@@ -89,6 +89,29 @@ class Line(object):
                 self.basepoint = None
             else:
                 raise e
+
+
+    def _is_parallel(self, l):
+        """
+        Return True if Line l is parallel to this Line, otherwise return False.
+        """
+
+        return self.normal_vector.is_parallel(l.normal_vector)
+
+
+    def _is_same(self, l):
+        """
+        Return True if Line l is the same line as this Line, otherwise return False.
+        """
+
+        # lines must be parallel to be the same line
+        if not self._is_parallel(l):
+            return False
+
+        # The Vector between the two basepoints
+        basepoint_difference = self.basepoint.subtract(l.basepoint)
+
+        return basepoint_difference.is_orthogonal(self.normal_vector)
 
 
     @staticmethod
