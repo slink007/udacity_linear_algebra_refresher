@@ -98,7 +98,7 @@ class Line(object):
         return self.normal_vector.is_parallel(l.normal_vector)
 
 
-    def _is_same(self, l):
+    def __eq__(self, l):
         """
         Return True if Line l is the same line as this Line, otherwise return False.
         """
@@ -119,7 +119,7 @@ class Line(object):
         intersection point.
         """
         if self._is_parallel(l):
-            if self._is_same(l):
+            if self.__eq__(l):
                 return (-1,)
             return (0,)
 
