@@ -6,12 +6,19 @@ class Plane(object):
     NO_NONZERO_ELTS_FOUND_MSG = 'No nonzero elements found'
 
     def __init__(self, normal_vector=None, constant_term=None):
+        '''
         self.dimension = 2
 
         if not normal_vector:
             all_zeros = ['0']*self.dimension
             normal_vector = Vector(all_zeros)
         self.normal_vector = normal_vector
+        '''
+        try:
+            self.dimension = len(normal_vector.coordinates)
+            self.normal_vector = normal_vector
+        except TypeError:
+            raise Exception("Require a Vector to declare a Plane")
 
         if not constant_term:
             constant_term = 0

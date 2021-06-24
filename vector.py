@@ -176,8 +176,8 @@ class Vector(object):
 
         ratio = v.coordinates[0] / self.coordinates[0]
         try:
-            for i in range(1, len(self.coordinates)):
-                assert (v.coordinates[i] / self.coordinates[i]) == ratio
+            for i in range(1, self.dimension):
+                assert round((v.coordinates[i] / self.coordinates[i]), 9) == round(ratio, 9)
         except AssertionError:
             return False
         return True
