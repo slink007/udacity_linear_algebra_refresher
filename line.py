@@ -1,8 +1,4 @@
-#from decimal import Decimal, getcontext
-
 from vector import Vector
-
-#getcontext().prec = 30
 
 
 class Line(object):
@@ -127,7 +123,20 @@ class Line(object):
                 return (-1,)
             return (0,)
 
-        # TODO: Put the intersecting point code in here
+        # If we got here then the lines are not parallel and they have an intersection at
+        # (x, y) with:
+        # x = (DK1 - BK2) / (AD - BC)
+        # y = (AK2 - CK1) / (AD - BC)
+        A,B = self.normal_vector.coordinates
+        K1 = self.constant_term
+        C,D = l.normal_vector.coordinates
+        K2 = l.constant_term
+        denominator = (A * D) - (B * C)
+        x = ((D * K1) - (B * K2)) / denominator
+        y = ((A * K2) - (C * K1)) / denominator
+
+        return (x, y)
+
 
 
     @staticmethod
@@ -140,6 +149,3 @@ class Line(object):
 
 
 
-#class MyDecimal(Decimal):
-#    def is_near_zero(self, eps=1e-10):
-#        return abs(self) < eps
