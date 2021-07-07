@@ -6,14 +6,6 @@ class Plane(object):
     NO_NONZERO_ELTS_FOUND_MSG = 'No nonzero elements found'
 
     def __init__(self, normal_vector=None, constant_term=None):
-        '''
-        self.dimension = 2
-
-        if not normal_vector:
-            all_zeros = ['0']*self.dimension
-            normal_vector = Vector(all_zeros)
-        self.normal_vector = normal_vector
-        '''
         try:
             self.dimension = len(normal_vector.coordinates)
             self.normal_vector = normal_vector
@@ -100,7 +92,7 @@ class Plane(object):
         return self.normal_vector.is_parallel(p.normal_vector)
 
 
-    def __eq__(self, p):
+    def is_same_plane(self, p):
         """
         Return True if Plane p is the same plane as this Plane, otherwise return False.
         """
@@ -112,6 +104,28 @@ class Plane(object):
         return basepoint_difference.is_orthogonal(self.normal_vector)
 
 
+    def __eq__(self, p):
+        """
+        Returns True if all coefficients of all variables in this Plane and Plane 'p' are
+        the same and if the constant_terms of both Planes are also the same.  Returns False
+        if any of those conditions are not met.
+
+        The suggested implementation of this has been moved to the is_same_plane method.
+        Although that code is good enough for the lecture during which it was introduced this
+        class is used within the LineSystem class and the expectation there is clearly what
+        I have coded below.  The suggested code returned false positives.
+        """
+        try:
+            assert self.dimension == p.dimension
+            assert self.constant_term == p.constant_term
+            for i in range(self.dimension):
+                assert self.normal_vector.coordinates[i] == p.normal_vector.coordinates[i]
+        except AssertionError:
+            return False
+
+        return True
+
+
     def intersection(self, p):
         """
         Returns a tuple indicating how the planes do, or do not, intersect.
@@ -121,7 +135,7 @@ class Plane(object):
         intersection point.
         """
         if self._is_parallel(p):
-            if self.__eq__(p):
+            if self.is_same_plane(p):
                 return (-1,)
             return (0,)
 
