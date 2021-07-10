@@ -47,8 +47,17 @@ class Plane(object):
 
         try:
             initial_index = Plane.first_nonzero_index(n)
-            terms = [write_coefficient(n[i], is_initial_term=(i==initial_index)) + 'x_{}'.format(i+1)
-                     for i in range(self.dimension) if round(n[i], num_decimal_places) != 0]
+            terms = [
+                write_coefficient(
+                    n[i],
+                    is_initial_term=(
+                        i == initial_index)) +
+                'x_{}'.format(
+                    i +
+                    1) for i in range(
+                    self.dimension) if round(
+                        n[i],
+                    num_decimal_places) != 0]
             output = ' '.join(terms)
 
         except Exception as e:
@@ -69,12 +78,12 @@ class Plane(object):
         try:
             n = self.normal_vector.coordinates
             c = self.constant_term
-            basepoint_coords = [0]*self.dimension
+            basepoint_coords = [0] * self.dimension
 
             initial_index = Plane.first_nonzero_index(n)
             initial_coefficient = n[initial_index]
 
-            basepoint_coords[initial_index] = c/initial_coefficient
+            basepoint_coords[initial_index] = c / initial_coefficient
             self.basepoint = Vector(basepoint_coords)
 
         except Exception as e:
@@ -94,7 +103,8 @@ class Plane(object):
 
     def is_same_plane(self, p):
         """
-        Return True if Plane p is the same plane as this Plane, otherwise return False.
+        Return True if Plane p is the same plane as this Plane, otherwise return
+        False.
         """
 
         # The Vector between the two basepoints
@@ -131,7 +141,7 @@ class Plane(object):
         Returns a tuple indicating how the planes do, or do not, intersect.
         If the planes are the same return (-1,).
         If the planes are parallel, but not the same, return (0,).
-        If the planes intersect return a tuple of the x and y coordinates of the 
+        If the planes intersect return a tuple of the x and y coordinates of the
         intersection point.
         """
         if self._is_parallel(p):
@@ -139,13 +149,13 @@ class Plane(object):
                 return (-1,)
             return (0,)
 
-        # If we got here then the planes are not parallel and they have an intersection at
-        # (x, y) with:
+        # If we got here then the planes are not parallel and they have an 
+        # intersection at (x, y) with:
         # x = (DK1 - BK2) / (AD - BC)
         # y = (AK2 - CK1) / (AD - BC)
-        A,B = self.normal_vector.coordinates
+        A, B = self.normal_vector.coordinates
         K1 = self.constant_term
-        C,D = p.normal_vector.coordinates
+        C, D = p.normal_vector.coordinates
         K2 = p.constant_term
         denominator = (A * D) - (B * C)
         x = ((D * K1) - (B * K2)) / denominator
@@ -154,13 +164,9 @@ class Plane(object):
         return (x, y)
 
 
-
     @staticmethod
     def first_nonzero_index(iterable):
         for k, item in enumerate(iterable):
             if not (round(item, 9) == 0):
                 return k
         raise Exception(Plane.NO_NONZERO_ELTS_FOUND_MSG)
-
-
-
