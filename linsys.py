@@ -132,9 +132,67 @@ class LinearSystem(object):
 
 
     def compute_triangular_form(self):
+        """
+        Makes a copy of the original system and attempts to put that copy
+        into rectangular form.  Returns the copy.
+        """
         system = deepcopy(self)
-        # TODO
-        print("compute_triangular_form")
+        # indices = system.indices_of_first_nonzero_terms_in_each_row()
+        # for i in range(len(indices)):
+        #     if i != indices[i]:
+        #         j = i + 1
+        #         while j < len(indices):
+        #             if i == indices[j]:
+        #                 system.swap_rows(i, j)
+        #                break
+        #             j += 1
+        # return system
+        num_equations = len(system)
+        num_variables = system.dimension
+
+        for i in range(num_equations):
+            for j in range(num_variables):
+                coefficient = MyDecimal(system[i].normal_vector[j])
+                if coefficient.is_near_zero():
+                    # Try to swap.  If we can't swap try the next
+                    # coefficient.
+                    if not system.swap_with_status(i, j):
+                        continue
+                system.clear_coefficients_below(i, j)
+
+
+    def clear_coefficients_below(self, row, column):
+        num_equations = len(self)
+        # Need the coefficient of the variable in question on this row
+        # to help form the scalar to multiply this line by when it is
+        # added to a line below it.
+        denominator = self[row].normal_vector[column]
+
+        for k in range(row + 1, num_equations):
+            vector = self[k].normal_vector
+            numerator = vector[column]
+            scalar = -(numerator / denominator)
+            self.add_multiple_times_row_to_row(scalar, row, k)
+
+
+    def swap_with_status(self, row, column):
+        """
+        It's assumed that the Plane at 'row' within the system has a
+        zero coefficient at the 'column' variable.  This attempts to
+        swap out a lower row and returns True/False based on the success
+        of that attempt.
+        """
+        num_equations = len(self)
+
+        # Start with next lowest plane and test all of them.
+        for plane in range(row + 1, num_equations):
+            coefficient = MyDecimal(self[plane].normal_vector[column])
+            # Swap the planes if the next plane does NOT have a zero
+            # coefficient for the variable in question.
+            if not coefficient.is_near_zero():
+                self.swap_rows(row, plane)
+                return True
+        return False
 
 
 class MyDecimal(Decimal):
