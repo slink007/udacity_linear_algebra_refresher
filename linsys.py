@@ -137,60 +137,49 @@ class LinearSystem(object):
         into rectangular form.  Returns the copy.
         """
         system = deepcopy(self)
-        # indices = system.indices_of_first_nonzero_terms_in_each_row()
-        # for i in range(len(indices)):
-        #     if i != indices[i]:
-        #         j = i + 1
-        #         while j < len(indices):
-        #             if i == indices[j]:
-        #                 system.swap_rows(i, j)
-        #                break
-        #             j += 1
-        # return system
-        num_equations = len(system)
-        num_variables = system.dimension
 
-        for i in range(num_equations):
-            for j in range(num_variables):
-                coefficient = MyDecimal(system[i].normal_vector[j])
-                if coefficient.is_near_zero():
-                    # Try to swap.  If we can't swap try the next
-                    # coefficient.
-                    if not system.swap_with_status(i, j):
+        num_eq = len(system)
+        num_var = system.dimension
+
+        j = 0
+        for i in range(num_eq):
+            while j < num_var:
+                c = MyDecimal(system[i].normal_vector.coordinates[j])
+                if c.is_near_zero():
+                    swap_succeeded = system.swap_row_below(i, j)
+                    if not swap_succeeded:
+                        j += 1
                         continue
+
                 system.clear_coefficients_below(i, j)
+                j += 1
+                break
+        return system
 
 
-    def clear_coefficients_below(self, row, column):
-        num_equations = len(self)
-        # Need the coefficient of the variable in question on this row
-        # to help form the scalar to multiply this line by when it is
-        # added to a line below it.
-        denominator = self[row].normal_vector[column]
+    def clear_coefficients_below(self, row, col):
+        num_eq = len(self)
+        beta = MyDecimal(self[row].normal_vector.coordinates[col])
 
-        for k in range(row + 1, num_equations):
-            vector = self[k].normal_vector
-            numerator = vector[column]
-            scalar = -(numerator / denominator)
-            self.add_multiple_times_row_to_row(scalar, row, k)
+        for k in range(row + 1, num_eq):
+            n = self[k].normal_vector
+            gamma = n.coordinates[col]
+            alpha = -gamma/beta
+            self.add_multiple_times_row_to_row(alpha, row, k)
 
 
-    def swap_with_status(self, row, column):
+    def swap_row_below(self, row, col):
         """
         It's assumed that the Plane at 'row' within the system has a
-        zero coefficient at the 'column' variable.  This attempts to
+        zero coefficient at the 'col' variable.  This attempts to
         swap out a lower row and returns True/False based on the success
         of that attempt.
         """
-        num_equations = len(self)
-
-        # Start with next lowest plane and test all of them.
-        for plane in range(row + 1, num_equations):
-            coefficient = MyDecimal(self[plane].normal_vector[column])
-            # Swap the planes if the next plane does NOT have a zero
-            # coefficient for the variable in question.
-            if not coefficient.is_near_zero():
-                self.swap_rows(row, plane)
+        num_eq = len(self)
+        for k in range(row + 1, num_eq):
+            c = MyDecimal(self[k].normal_vector[col])
+            if not c.is_near_zero():
+                self.swap_rows(row, k)
                 return True
         return False
 
@@ -291,11 +280,51 @@ if __name__ == "__main__":
             s[3] == p3):
         result = 'failed'
     print("Test case " + test + " " + result)
+    print('')
 
-    # Setup for next batch of tests
+    """
+    # Test 10
     p1 = Plane(Vector([1, 1, 1]), 1)
     p2 = Plane(Vector([0, 1, 1]), 2)
     s = LinearSystem([p1, p2])
-    print(p1)
-    print(p2)
-    print(s.indices_of_first_nonzero_terms_in_each_row())
+    t = s.compute_triangular_form()
+    result = 'passed'
+    test = '10'
+    if not (t[0] == p1 and t[1] == p2):
+        result = 'failed'
+    print("Test case " + test + " " + result)
+    print('')
+    """
+
+    # Test 11
+    p1 = Plane(Vector([1, 1, 1]), 1)
+    p2 = Plane(Vector([0, 1, 0]), 2)
+    p3 = Plane(Vector([1, 1, -1]), 3)
+    p4 = Plane(Vector([1, 0, -2]), 2)
+    s = LinearSystem([p1, p2, p3, p4])
+    t = s.compute_triangular_form()
+    result = 'passed'
+    test = '11'
+    if not (t[0] == p1 and
+            t[1] == p2 and
+            t[2] == Plane(Vector([0, 0, -2]), 2) and
+            t[3] == Plane()):
+        result = 'failed'
+    print("Test case " + test + " " + result)
+    print('')
+
+    """
+    # Test 12
+    p1 = Plane(Vector([0, 1, 1]), 1)
+    p2 = Plane(Vector([1, -1, 1]), 2)
+    p3 = Plane(Vector([1, 2, -5]), 3)
+    s = LinearSystem([p1, p2, p3])
+    t = s.compute_triangular_form()
+    result = 'passed'
+    test = '12'
+    if not (t[0] == Plane(Vector([1, -1, 1]), 2) and
+            t[1] == Plane(Vector([0, 1, 1]), 1) and
+            t[2] == Plane(normal_vector=Vector([0, 0, -9]), constant_term=-2)):
+        result = 'failed'
+    print("Test case " + test + " " + result)
+    """
