@@ -137,23 +137,21 @@ class LinearSystem(object):
         into rectangular form.  Returns the copy.
         """
         system = deepcopy(self)
-
         num_eq = len(system)
         num_var = system.dimension
-
-        j = 0
-        for i in range(num_eq):
-            while j < num_var:
-                c = MyDecimal(system[i].normal_vector.coordinates[j])
-                if c.is_near_zero():
-                    swap_succeeded = system.swap_row_below(i, j)
-                    if not swap_succeeded:
-                        j += 1
+        for row in range(num_eq):
+            for col in range(num_var):
+                coefficient = \
+                        MyDecimal(system[row].normal_vector.coordinates[col])
+                if coefficient.is_near_zero():
+                    if not system.swap_row_below(row, col):
                         continue
-
-                system.clear_coefficients_below(i, j)
-                j += 1
+                # Once all coefficients in 'col' column are cleared
+                # in the rows below 'row' break out of this loop
+                # and process the next row.
+                system.clear_coefficients_below(row, col)
                 break
+
         return system
 
 
