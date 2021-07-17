@@ -159,7 +159,8 @@ class LinearSystem(object):
 
     def clear_coefficients_below(self, row, col):
         num_eq = len(self)
-        beta = MyDecimal(self[row].normal_vector.coordinates[col])
+        # beta = MyDecimal(self[row].normal_vector.coordinates[col])
+        beta = self[row].normal_vector.coordinates[col]
 
         for k in range(row + 1, num_eq):
             n = self[k].normal_vector
@@ -177,7 +178,7 @@ class LinearSystem(object):
         """
         num_eq = len(self)
         for k in range(row + 1, num_eq):
-            c = MyDecimal(self[k].normal_vector[col])
+            c = MyDecimal(self[k].normal_vector.coordinates[col])
             if not c.is_near_zero():
                 self.swap_rows(row, k)
                 return True
@@ -280,9 +281,7 @@ if __name__ == "__main__":
             s[3] == p3):
         result = 'failed'
     print("Test case " + test + " " + result)
-    print('')
 
-    """
     # Test 10
     p1 = Plane(Vector([1, 1, 1]), 1)
     p2 = Plane(Vector([0, 1, 1]), 2)
@@ -293,8 +292,6 @@ if __name__ == "__main__":
     if not (t[0] == p1 and t[1] == p2):
         result = 'failed'
     print("Test case " + test + " " + result)
-    print('')
-    """
 
     # Test 11
     p1 = Plane(Vector([1, 1, 1]), 1)
@@ -308,12 +305,10 @@ if __name__ == "__main__":
     if not (t[0] == p1 and
             t[1] == p2 and
             t[2] == Plane(Vector([0, 0, -2]), 2) and
-            t[3] == Plane()):
+            t[3] == Plane(Vector([0, 0, 0]), 0)):
         result = 'failed'
     print("Test case " + test + " " + result)
-    print('')
 
-    """
     # Test 12
     p1 = Plane(Vector([0, 1, 1]), 1)
     p2 = Plane(Vector([1, -1, 1]), 2)
@@ -327,4 +322,3 @@ if __name__ == "__main__":
             t[2] == Plane(normal_vector=Vector([0, 0, -9]), constant_term=-2)):
         result = 'failed'
     print("Test case " + test + " " + result)
-    """
