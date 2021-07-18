@@ -182,6 +182,40 @@ class LinearSystem(object):
                 return True
         return False
 
+    def compute_rref(self):
+        """
+        Converts a system of linear equations into Reduced Row
+        Echelon Form (RREF) and returns the converted system.
+        """
+        system = self.compute_triangular_form()
+        pivot_indices = system.indices_of_first_nonzero_terms_in_each_row()
+        for i, row in reversed(list(enumerate(system.planes))):
+            first_non_zero_index = pivot_indices[i]
+            if first_non_zero_index < 0:
+                continue
+            system.scale_row(i, first_non_zero_index)
+            system.clear_coefficients_above(i, first_non_zero_index)
+        return system
+
+
+    def scale_row(self, row_index, column_index):
+        """
+        Finds the coefficient of the variable at 'column_index' within row
+        'row_index' and calculates a scalar based on that coefficient. When
+        the row in question is multiplied by that scalar the coefficient of
+        the variable at 'column_index' becomes 1.  Instead of returning
+        something this will modify the existing row.
+        """
+        scalar = 1 / \
+            self.planes[row_index].normal_vector.coordinates[column_index]
+        self.multiply_coefficient_and_row(scalar, row_index)
+
+
+    def clear_coefficients_above(self, row, col):
+        for k in range(row)[::-1]:
+            scalar = -(self[k].normal_vector.coordinates[col])
+            self.add_multiple_times_row_to_row(scalar, row, k)
+
 
 class MyDecimal(Decimal):
     def is_near_zero(self, eps=1e-10):
@@ -318,5 +352,24 @@ if __name__ == "__main__":
     if not (t[0] == Plane(Vector([1, -1, 1]), 2) and
             t[1] == Plane(Vector([0, 1, 1]), 1) and
             t[2] == Plane(normal_vector=Vector([0, 0, -9]), constant_term=-2)):
+        result = 'failed'
+    print("Test case " + test + " " + result)
+
+    # Test 13
+    # I honestly have no idea if this test is valid or not.  Despite promises
+    # from the course instructor to provide test cases for computing rref
+    # none were provided.  I compared the results from my solution against
+    # the results from the instructor's solution, saw that they were the
+    # same, and wrote this test to expect that result.
+    p1 = Plane(Vector([0, 1, 1]), 1)
+    p2 = Plane(Vector([1, -1, 1]), 2)
+    p3 = Plane(Vector([1, 2, -5]), 3)
+    s = LinearSystem([p1, p2, p3])
+    t = s.compute_rref()
+    result = 'passed'
+    test = '13'
+    if not (t[0] == Plane(Vector([1.0, 0.0, 0.0]), 2.5555555555555554) and
+            t[1] == Plane(Vector([0.0, 1.0, 0.0]), 0.7777777777777778) and
+            t[2] == Plane(Vector([-0.0, -0.0, 1.0]), 0.2222222222222222)):
         result = 'failed'
     print("Test case " + test + " " + result)
