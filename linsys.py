@@ -182,6 +182,7 @@ class LinearSystem(object):
                 return True
         return False
 
+
     def compute_rref(self):
         """
         Converts a system of linear equations into Reduced Row
@@ -215,6 +216,55 @@ class LinearSystem(object):
         for k in range(row)[::-1]:
             scalar = -(self[k].normal_vector.coordinates[col])
             self.add_multiple_times_row_to_row(scalar, row, k)
+
+    def _no_intersections(self):
+        """
+        Looks over all Planes in the list and tries to find one which is in
+        form of 0 = <something which is not zero>.  Finding that means there
+        is no intersection and True is returned.  Otherwise return False.
+        """
+        for i, p in enumerate(self.planes):
+            try:
+                p.first_nonzero_index(p.normal_vector.coordinates)
+            except Exception as e:
+                if str(e) == Plane.NO_NONZERO_ELTS_FOUND_MSG:
+                    if round(p.constant_term, 9) != 0:
+                        return True
+                    # Reaching this means the Plane is 0 = 0
+                    # and needs to be removed.
+                    self.planes.pop(i)
+        return False
+
+
+    def _infinite_solutions(self):
+        """
+        Assumes that the Plane equations are in reduced row echelon form.
+        Looks for plane which has sum of coefficients greater than 1.
+        Such a row will have a free variable and this means there are
+        infinite solutions and True is returned.  Returns False otherwise.
+        """
+        for p in self.planes:
+            if sum(p.normal_vector.coordinates) > 1:
+                return True
+        return False
+
+
+    def gaussian_elimination(self):
+        """
+        Performs gaussian elimination on a set of linear equations.  Returns
+        (-1,) if there are infinite solutions.  Returns (0,) if there are no
+        solutions.  If there is a single solution returns that in a tuple.
+        For example, in a system with x, y, and z components the returned
+        tuple would be (x_value, y_value, z_value).
+        """
+        ge = self.compute_rref()
+
+        if ge._no_intersections():
+            return (0,)
+        if ge._infinite_solutions():
+            return (-1,)
+        solutions = [p.constant_term for p in ge.planes]
+        return tuple(solutions)
 
 
 class MyDecimal(Decimal):
@@ -373,3 +423,24 @@ if __name__ == "__main__":
             t[2] == Plane(Vector([-0.0, -0.0, 1.0]), 0.2222222222222222)):
         result = 'failed'
     print("Test case " + test + " " + result)
+
+    print("\n============ Quiz Solutions ==========")
+    p1 = Plane(Vector([5.862, 1.178, -10.366]), -8.15)
+    p2 = Plane(Vector([-2.931, -0.589, 5.183]), -4.075)
+
+    p3 = Plane(Vector([8.631, 5.112, -1.816]), -5.113)
+    p4 = Plane(Vector([4.315, 11.132, -5.27]), -6.775)
+    p5 = Plane(Vector([-2.158, 3.01, -1.727]), -0.831)
+
+    p6 = Plane(Vector([5.262, 2.739, -9.878]), -3.441)
+    p7 = Plane(Vector([5.111, 6.358, 7.638]), -2.152)
+    p8 = Plane(Vector([2.016, -9.924, -1.367]), -9.278)
+    p9 = Plane(Vector([2.167, -13.543, -18.883]), -10.567)
+
+    s1 = LinearSystem([p1, p2])
+    s2 = LinearSystem([p3, p4, p5])
+    s3 = LinearSystem([p6, p7, p8, p9])
+
+    print("System 1 solution is: {}".format(s1.gaussian_elimination()))
+    print("System 2 solution is: {}".format(s2.gaussian_elimination()))
+    print("System 3 solution is: {}".format(s3.gaussian_elimination()))
