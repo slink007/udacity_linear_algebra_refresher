@@ -272,6 +272,36 @@ class MyDecimal(Decimal):
         return abs(self) < eps
 
 
+class Parametrization(object)
+    BASEPT_AND_DIR_VECTORS_MUST_BE_IN_SAME_DIM_MSG = 'The basepoint and ' + \
+            'direction vectors should all live in the same dimension.'
+
+    def __init__(self, basepoint, direction_vectors):
+        self.basepoint = basepoint
+        self.direction_vectors = direction_vectors
+        self.dimension = self.basepoint.dimension
+
+        try:
+            for v in direction_vectors:
+                assert v.dimension == self.dimension
+        except AssertionError:
+            raise Exception(EPT_AND_DIR_VECTORS_MUST_BE_IN_SAME_DIM_MSG)
+
+
+    def compute_solution(self):
+        try:
+            return self.do_gaussian_elimination_and_parametrize_solution()
+        except Exception as e:
+            if str(e) == self.NO_SOLUTIONS_MSG:
+                return str(e)
+            else:
+                raise e
+
+
+    def do_gaussian_elimination_and_parametrize_solution(self):
+        rref = self.compute_rref()
+
+
 if __name__ == "__main__":
     p0 = Plane(normal_vector=Vector([1, 1, 1]), constant_term=1)
     p1 = Plane(normal_vector=Vector([0, 1, 0]), constant_term=2)
@@ -444,3 +474,9 @@ if __name__ == "__main__":
     print("System 1 solution is: {}".format(s1.gaussian_elimination()))
     print("System 2 solution is: {}".format(s2.gaussian_elimination()))
     print("System 3 solution is: {}".format(s3.gaussian_elimination()))
+
+    print("\n============ Parametrization ==========")
+    p1 = Plane(Vector([0.786, 0.786, 0.588]), -0.714)
+    p2 = Plane(Vector([-0.138, -0.138, 0.244]), 0.319)
+    s1 = LinearSystem([p1, p2])
+    print("System 1 solution is: {}".format(s1.gaussian_elimination()))
