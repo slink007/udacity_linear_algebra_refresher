@@ -11,7 +11,7 @@ class LinearSystem(object):
 
     ALL_PLANES_MUST_BE_IN_SAME_DIM_MSG = 'All planes in the system should live \
             in the same dimension'
-    NO_SOLUTIONS_MSG = 'No solutions'
+    NO_SOLUTIONS_MSG = "No solutions"
     INF_SOLUTIONS_MSG = 'Infinitely many solutions'
 
     def __init__(self, planes):
@@ -231,7 +231,7 @@ class LinearSystem(object):
                         return True
                     # Reaching this means the Plane is 0 = 0
                     # and needs to be removed.
-                    self.planes.pop(i)
+                    # self.planes.pop(i)
         return False
 
 
@@ -248,20 +248,64 @@ class LinearSystem(object):
         return False
 
 
+    def _get_basepoint(self):
+        """
+        Assumes that we've tried to put equations into reduced row echelon
+        form but failed because there are infinite solutions.  Finds the
+        basepoint of the equation set and returns it as a list?  A Vector?
+        """
+        num_var = self.dimension
+        pivot_indices = self.indices_of_first_nonzero_terms_in_each_row()
+        basepoint = [0] * num_var
+        for i, p in enumerate(self.planes):
+            if pivot_indices[i] < 0:
+                break
+            basepoint[pivot_indices[i]] = p.constant_term
+        return basepoint
+
+
+    def _get_direction_vectors(self):
+        """
+        Assumes that we've tried to put equations into reduced row echelon
+        form but failed because there are infinite solutions.  Finds the
+        direction vector(s) of the equation set and returns it or them
+        within a list.
+        """
+        num_var = self.dimension
+        pivot_indices = self.indices_of_first_nonzero_terms_in_each_row()
+        freevar_indices = set(range(num_var)) -  set(pivot_indices)
+        direction_vectors = []
+        for fv in freevar_indices:
+            vector_coordinates = [0] * num_var
+            vector_coordinates[fv] = 1
+            for i, p in enumerate(self.planes):
+                pivot_var = pivot_indices[i]
+                if pivot_var < 0:
+                    break
+                vector_coordinates[pivot_var] = 0 - p.normal_vector.coordinates[fv]
+            direction_vectors.append(vector_coordinates)
+        return direction_vectors
+
+
+
     def gaussian_elimination(self):
         """
-        Performs gaussian elimination on a set of linear equations.  Returns
-        (-1,) if there are infinite solutions.  Returns (0,) if there are no
-        solutions.  If there is a single solution returns that in a tuple.
+        Performs gaussian elimination on a set of linear equations.  If there
+        are no solutions returns a message to that effect.  If there are
+        infinite solutions returns the parametrized "solution".  If there
+        is a real, single solution then returns that sollutio in a tuple.
         For example, in a system with x, y, and z components the returned
         tuple would be (x_value, y_value, z_value).
         """
         ge = self.compute_rref()
 
         if ge._no_intersections():
-            return (0,)
+            return self.NO_SOLUTIONS_MSG
         if ge._infinite_solutions():
-            return (-1,)
+            print(ge)
+            print('basepoint = {}'.format(ge._get_basepoint()))
+            print('direction vector(s) = {}'.format(ge._get_direction_vectors()))
+            return self.INF_SOLUTIONS_MSG
         solutions = [p.constant_term for p in ge.planes]
         return tuple(solutions)
 
@@ -269,36 +313,6 @@ class LinearSystem(object):
 class MyDecimal(Decimal):
     def is_near_zero(self, eps=1e-10):
         return abs(self) < eps
-
-
-class Parametrization(object):
-    NO_SOLUTIONS_MSG = ('There are no solutions')
-
-    def __init__(self, basepoint, direction_vectors):
-        self.basepoint = basepoint
-        self.direction_vectors = direction_vectors
-        self.dimension = self.basepoint.dimension
-
-        try:
-            for v in direction_vectors:
-                assert v.dimension == self.dimension
-        except AssertionError:
-            raise Exception('The basepoint and direction vectors should all \
-                            live in the same dimension.')
-
-
-    def compute_solution(self):
-        try:
-            return self.do_gaussian_elimination_and_parametrize_solution()
-        except Exception as e:
-            if str(e) == self.NO_SOLUTIONS_MSG:
-                return str(e)
-            else:
-                raise e
-
-
-    def do_gaussian_elimination_and_parametrize_solution(self):
-        rref = self.compute_rref()
 
 
 if __name__ == "__main__":
