@@ -1,5 +1,3 @@
-# This will either have to go (most likely) or I'll have to
-# put Decimal back into the other files.
 from decimal import Decimal, getcontext
 from copy import deepcopy
 
@@ -217,6 +215,7 @@ class LinearSystem(object):
             scalar = -(self[k].normal_vector.coordinates[col])
             self.add_multiple_times_row_to_row(scalar, row, k)
 
+
     def _no_intersections(self):
         """
         Looks over all Planes in the list and tries to find one which is in
@@ -272,9 +271,8 @@ class MyDecimal(Decimal):
         return abs(self) < eps
 
 
-class Parametrization(object)
-    BASEPT_AND_DIR_VECTORS_MUST_BE_IN_SAME_DIM_MSG = 'The basepoint and ' + \
-            'direction vectors should all live in the same dimension.'
+class Parametrization(object):
+    NO_SOLUTIONS_MSG = ('There are no solutions')
 
     def __init__(self, basepoint, direction_vectors):
         self.basepoint = basepoint
@@ -285,7 +283,8 @@ class Parametrization(object)
             for v in direction_vectors:
                 assert v.dimension == self.dimension
         except AssertionError:
-            raise Exception(EPT_AND_DIR_VECTORS_MUST_BE_IN_SAME_DIM_MSG)
+            raise Exception('The basepoint and direction vectors should all \
+                            live in the same dimension.')
 
 
     def compute_solution(self):
