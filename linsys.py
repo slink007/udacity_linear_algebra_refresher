@@ -229,9 +229,6 @@ class LinearSystem(object):
                 if str(e) == Plane.NO_NONZERO_ELTS_FOUND_MSG:
                     if round(p.constant_term, 9) != 0:
                         return True
-                    # Reaching this means the Plane is 0 = 0
-                    # and needs to be removed.
-                    # self.planes.pop(i)
         return False
 
 
@@ -242,6 +239,19 @@ class LinearSystem(object):
         Such a row will have a free variable and this means there are
         infinite solutions and True is returned.  Returns False otherwise.
         """
+        # Get rid of rows where 0 = 0
+        new_planes = []
+        for p in self.planes:
+            for item in p.normal_vector.coordinates:
+                if not (round(item, 9) == 0):
+                    new_planes.append(p)
+                    break
+        self.planes = new_planes
+
+        # Infinite if we have fewer equations than unknowns
+        if len(self.planes) < self.dimension:
+            return True
+
         for p in self.planes:
             if sum(p.normal_vector.coordinates) > 1:
                 return True
@@ -273,7 +283,7 @@ class LinearSystem(object):
         """
         num_var = self.dimension
         pivot_indices = self.indices_of_first_nonzero_terms_in_each_row()
-        freevar_indices = set(range(num_var)) -  set(pivot_indices)
+        freevar_indices = set(range(num_var)) - set(pivot_indices)
         direction_vectors = []
         for fv in freevar_indices:
             vector_coordinates = [0] * num_var
@@ -282,10 +292,41 @@ class LinearSystem(object):
                 pivot_var = pivot_indices[i]
                 if pivot_var < 0:
                     break
-                vector_coordinates[pivot_var] = 0 - p.normal_vector.coordinates[fv]
+                vector_coordinates[pivot_var] = 0 - \
+                    p.normal_vector.coordinates[fv]
             direction_vectors.append(vector_coordinates)
         return direction_vectors
 
+
+    def _parameters(self, basepoint, vectors):
+        """
+        Assumes that we've tried to put equations into reduced row echelon
+        form but failed because there are infinite solutions.  The 'basepoint'
+        input is the basepoint vector of the solution (as a list) and the
+        'vectors' input is a list containing the direction vector(s) of the
+        free variable(s).  Each direction vector is also in list format.
+        """
+        reply = "\n"
+        for i, b in enumerate(basepoint):
+            reply += "X_{} = ".format(i + 1)
+            non_zero = True
+            if (round(b, 3)) != 0:
+                reply += "{}".format(round(b, 3))
+            else:
+                non_zero = False
+            number = 20
+            for j, v in enumerate(vectors):
+                if (round(v[i], 3)) != 0:
+                    if non_zero:
+                        reply += " + {} {}".format(
+                            round(v[i], 3), chr(ord('`') + number))
+                    else:
+                        reply += "{} {}".format(
+                            round(v[i], 3), chr(ord('`') + number))
+                        non_zero = True
+                number -= 1
+            reply += "\n"
+        return reply[:-1]
 
 
     def gaussian_elimination(self):
@@ -302,10 +343,8 @@ class LinearSystem(object):
         if ge._no_intersections():
             return self.NO_SOLUTIONS_MSG
         if ge._infinite_solutions():
-            print(ge)
-            print('basepoint = {}'.format(ge._get_basepoint()))
-            print('direction vector(s) = {}'.format(ge._get_direction_vectors()))
-            return self.INF_SOLUTIONS_MSG
+            return self._parameters(ge._get_basepoint(),
+                                    ge._get_direction_vectors())
         solutions = [p.constant_term for p in ge.planes]
         return tuple(solutions)
 
@@ -493,3 +532,16 @@ if __name__ == "__main__":
     p2 = Plane(Vector([-0.138, -0.138, 0.244]), 0.319)
     s1 = LinearSystem([p1, p2])
     print("System 1 solution is: {}".format(s1.gaussian_elimination()))
+
+    p3 = Plane(Vector([8.631, 5.112, -1.816]), -5.113)
+    p4 = Plane(Vector([4.315, 11.132, -5.27]), -6.775)
+    p5 = Plane(Vector([-2.158, 3.01, -1.727]), -0.831)
+    s2 = LinearSystem([p3, p4, p5])
+    print("\nSystem 2 solution is: {}".format(s2.gaussian_elimination()))
+
+    p6 = Plane(Vector([0.935, 1.76, -9.365]), -9.955)
+    p7 = Plane(Vector([0.187, 0.352, -1.873]), -1.991)
+    p8 = Plane(Vector([0.374, 0.704, -3.746]), -3.982)
+    p9 = Plane(Vector([-0.561, -1.056, 5.619]), 5.973)
+    s3 = LinearSystem([p6, p7, p8, p9])
+    print("\nSystem 3 solution is: {}".format(s3.gaussian_elimination()))
